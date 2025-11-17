@@ -5,6 +5,5 @@
     },
     "typeRoots": ["./node_modules/@types"],
     "skipLibCheck": true
-  },
-  "exclude": ["node_modules/@types/bunyan"]
+  }
 }

@@ -12,7 +12,7 @@ const DashboardPage = () => {
 
       {/* Accounts grid */}
 
-      <div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CreateAccountDrawer>
           <Card className="hover:shadow-md transition-shadow cursor-pointer border-dashed">
             <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">

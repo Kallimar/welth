@@ -7,10 +7,15 @@ export const accountSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
-
-export const transactionSchema = z.object({
+export const transactionSchema = z
+  .object({
     type: z.enum(["INCOME", "EXPENSE"]),
-    amount: z.string().min(1, "Amount is required"),
+    amount: z.coerce
+      .number({
+        required_error: "Amount is required",
+        invalid_type_error: "Amount must be a number",
+      })
+      .positive("Amount must be greater than 0"),
     description: z.string().optional(),
     date: z.date({ required_error: "Date is required" }),
     accountId: z.string().min(1, "Account is required"),

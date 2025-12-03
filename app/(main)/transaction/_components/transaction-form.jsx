@@ -24,10 +24,14 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import React from "react";
+import { useRouter } from "next/navigation";
+
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const AddTransactionForm = ({ accounts, categories }) => {
+  const router = useRouter();
   const {
     register,
     setValue,
@@ -61,17 +65,34 @@ const AddTransactionForm = ({ accounts, categories }) => {
     (category) => category.type === type
   );
 
+  const onSubmit = async (data) => {
+    const formData = {
+      ...data,
+      amount: parseFloat(data.amount),
+    };
+    transactionFn(formData);
+  };
+
+  useEffect(() => {
+    if (transactionResult?.success && !transactionLoading) {
+      toast.success("Transaction created successfully");
+      reset();
+      router.push(`/account/${transactionResult.data.accountId}`);
+    }
+  }, [transactionResult, transactionLoading]);
+
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* ai scanner */}
 
+      {/* account type */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
         <Select
           onValueChange={(value) => setValue("type", value)}
           defaultValue={type}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -83,7 +104,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
           <p className="text-sm text-red-500">{errors.type.message}</p>
         )}
       </div>
-
+      {/* amount and account  */}
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <label className="text-sm font-medium">Amount</label>
@@ -105,7 +126,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
             onValueChange={(value) => setValue("accountId", value)}
             defaultValue={getValues("accountId")}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger>
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
@@ -129,14 +150,14 @@ const AddTransactionForm = ({ accounts, categories }) => {
           )}
         </div>
       </div>
-
+      {/* category  */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Category</label>
         <Select
           onValueChange={(value) => setValue("category", value)}
           defaultValue={getValues("category")}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent className="max-h-[300px] overflow-y-auto">
@@ -151,7 +172,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
           <p className="text-sm text-red-500">{errors.category.message}</p>
         )}
       </div>
-
+      {/* date  */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Date</label>
         <Popover>
@@ -183,7 +204,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
           <p className="text-sm text-red-500">{errors.date.message}</p>
         )}
       </div>
-
+      {/* description  */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
         <Input placeholder="Enter description" {...register("description")} />
@@ -191,7 +212,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
           <p className="text-sm text-red-500">{errors.description.message}</p>
         )}
       </div>
-
+      {/* recurring transaction  */}
       <div className="flex flex-row items-center justify-between rounded-lg border p-4">
         <div className="space-y-0.5">
           <label className="text-base font-medium">Recurring Transaction</label>
@@ -203,6 +224,47 @@ const AddTransactionForm = ({ accounts, categories }) => {
           checked={isRecurring}
           onCheckedChange={(checked) => setValue("isRecurring", checked)}
         />
+      </div>
+      {/* if recurring  */}
+      {isRecurring && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Recurring Interval</label>
+          <Select
+            onValueChange={(value) => setValue("recurringInterval", value)}
+            defaultValue={getValues("recurringInterval")}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select interval" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="DAILY">Daily</SelectItem>
+              <SelectItem value="WEEKLY">Weekly</SelectItem>
+              <SelectItem value="MONTHLY">Monthly</SelectItem>
+              <SelectItem value="YEARLY">Yearly</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.recurringInterval && (
+            <p className="text-sm text-red-500">
+              {errors.recurringInterval.message}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* submit and cancel  */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => router.back()}
+        >
+          Cancel
+        </Button>
+
+        <Button type="submit" className="w-full" disabled={transactionLoading}>
+          Create Transaction
+        </Button>
       </div>
     </form>
   );

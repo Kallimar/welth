@@ -50,7 +50,6 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.0",
-    "@react-email/preview-server": "^5.0.5",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.0.3",
     "postcss": "^8.5.6",

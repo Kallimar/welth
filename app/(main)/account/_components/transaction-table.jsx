@@ -143,9 +143,7 @@ const TransactionTable = ({ transactions }) => {
     setSortConfig((current) => ({
       field,
       direction:
-        current.field === field && current.direction === "asc"
-          ? "desc"
-          : "asc",
+        current.field === field && current.direction === "asc" ? "desc" : "asc",
     }));
   };
 
@@ -384,12 +382,13 @@ const TransactionTable = ({ transactions }) => {
                     {transaction.amount.toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    {transaction.isRecurring ? (
+                    {transaction.isRecurring &&
+                    transaction.recurringInterval ? (
                       <Tooltip>
                         <TooltipTrigger>
                           <Badge
                             variant="outline"
-                            className="gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            className="gap-1 bg-purple-100 text-purple-700"
                           >
                             <RefreshCw className="h-3 w-3" />
                             {RECURRING_INTERVALS[transaction.recurringInterval]}
@@ -399,10 +398,12 @@ const TransactionTable = ({ transactions }) => {
                           <div className="text-sm">
                             <div className="font-medium">Next Date :</div>
                             <div>
-                              {format(
-                                new Date(transaction.nextRecurringDate),
-                                "PP"
-                              )}
+                              {transaction.nextRecurringDate
+                                ? format(
+                                    new Date(transaction.nextRecurringDate),
+                                    "PP"
+                                  )
+                                : "Not scheduled"}
                             </div>
                           </div>
                         </TooltipContent>

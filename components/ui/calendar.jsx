@@ -1,21 +1,11 @@
 "use client";
 
 import * as React from "react";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
-
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}) {
+function Calendar({ className, classNames, showOutsideDays = true, ...props }) {
   const defaultClassNames = getDefaultClassNames();
 
   return (
@@ -23,50 +13,47 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("bg-background p-3", className)}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: "w-fit",
 
-        /* MONTH CONTAINER */
         months: "flex flex-col",
-
         month: "space-y-4",
 
-        /* ✅ HEADER LINE */
-        caption: "flex items-center justify-between px-2",
+        /* ✅ HEADER WRAPPER */
+        caption:
+          "relative flex items-center justify-center h-8",
 
         caption_label:
-          "text-sm font-medium text-foreground",
+          "text-sm font-medium",
 
-        nav: "flex items-center gap-1",
+        /* ✅ FORCE NAV INTO HEADER */
+        nav:
+          "absolute inset-y-0 left-0 right-0 flex items-center justify-between px-1",
 
         nav_button:
-          "h-7 w-7 p-0 rounded-md hover:bg-muted",
-
-        nav_button_previous: "",
-        nav_button_next: "",
+          "h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center",
 
         /* DAYS */
         table: "w-full border-collapse",
         weekdays: "flex",
         weekday:
-          "text-muted-foreground flex-1 text-xs text-center",
+          "flex-1 text-xs text-center text-muted-foreground",
         week: "flex w-full",
         day: "flex-1 aspect-square flex items-center justify-center",
         day_button:
           "h-9 w-9 rounded-md text-sm hover:bg-muted",
 
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary",
+          "bg-primary text-primary-foreground",
         day_today:
-          "border border-primary text-primary",
+          "border border-primary",
         day_outside:
           "text-muted-foreground opacity-50",
 
         ...classNames,
       }}
       components={{
-        /* ✅ Custom navigation icons */
-        IconLeft: () => <ChevronLeftIcon className="h-4 w-4" />,
-        IconRight: () => <ChevronRightIcon className="h-4 w-4" />,
+        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+        IconRight: () => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />

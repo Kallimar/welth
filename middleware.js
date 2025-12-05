@@ -1,6 +1,6 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
 export const runtime = "experimental-edge";
+
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtected = createRouteMatcher([
   "/dashboard(.*)",
@@ -16,7 +16,5 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  matcher: [
-    "/((?!_next|favicon.ico|assets|.*\\.(png|jpg|jpeg|svg|ico|css|js)).*)",
-  ],
+  matcher: ["/:path*"], // <— simple, correct, works
 };

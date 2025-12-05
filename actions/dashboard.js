@@ -1,7 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 const serializeTransaction = (obj) => {
@@ -24,7 +23,7 @@ export async function createAccount(data) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
@@ -41,7 +40,7 @@ export async function createAccount(data) {
 
     //check if this is user's first account
 
-    const existingAccounts = await db.account.findMany({
+    const existingAccounts = await prisma.account.findMany({
       where: {
         userId: user.id,
       },
@@ -52,13 +51,13 @@ export async function createAccount(data) {
 
     //if this account should be default, uset other default accounts
     if (shouldBeDefault) {
-      await db.account.updateMany({
+      await prisma.account.updateMany({
         where: { userId: user.id, isDefault: true },
         data: { isDefault: false },
       });
     }
 
-    const account = await db.account.create({
+    const account = await prisma.account.create({
       data: {
         ...data,
         balance: balanceFloat,
@@ -82,7 +81,7 @@ export async function getUserAccounts() {
     throw new Error("Unauthorized");
   }
 
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
 
@@ -90,7 +89,7 @@ export async function getUserAccounts() {
     throw new Error("User not found");
   }
 
-  const accounts = await db.account.findMany({
+  const accounts = await prisma.account.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
     include: {
@@ -110,7 +109,7 @@ export async function getDashboardData() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
 
@@ -119,7 +118,7 @@ export async function getDashboardData() {
   }
 
   // Get all user transactions
-  const transactions = await db.transaction.findMany({
+  const transactions = await prisma.transaction.findMany({
     where: { userId: user.id },
     orderBy: { date: "desc" },
   });

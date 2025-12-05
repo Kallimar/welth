@@ -1,7 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { success } from "zod";
 
@@ -25,7 +24,7 @@ export async function updateDefaultAccount(accountId) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
@@ -33,12 +32,12 @@ export async function updateDefaultAccount(accountId) {
       throw new Error("User not found");
     }
 
-    await db.account.updateMany({
+    await prisma.account.updateMany({
       where: { userId: user.id, isDefault: true },
       data: { isDefault: false },
     });
 
-    const account = await db.account.update({
+    const account = await prisma.account.update({
       where: {
         id: accountId,
         userId: user.id,
@@ -59,7 +58,7 @@ export async function getAccountWithTransactions(accountId) {
     throw new Error("Unauthorized");
   }
 
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
 
@@ -67,7 +66,7 @@ export async function getAccountWithTransactions(accountId) {
     throw new Error("User not found");
   }
 
-  const account = await db.account.findUnique({
+  const account = await prisma.account.findUnique({
     where: { id: accountId, userId: user.id },
     include: {
       transactions: {
@@ -93,14 +92,14 @@ export async function bulkDeleteTransactions(transactionIds) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
     // Get transactions to calculate balance changes
-    const transactions = await db.transaction.findMany({
+    const transactions = await prisma.transaction.findMany({
       where: {
         id: { in: transactionIds },
         userId: user.id,
@@ -118,7 +117,7 @@ export async function bulkDeleteTransactions(transactionIds) {
     }, {});
 
     // Delete transactions and update account balances in a transaction
-    await db.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // Delete transactions
       await tx.transaction.deleteMany({
         where: {

@@ -1,7 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";import { auth } from "@clerk/nextjs/server";
 import { err } from "inngest/types";
 import { revalidatePath } from "next/cache";
 
@@ -12,7 +11,7 @@ export async function getCurrentBudget(accountId) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
@@ -20,7 +19,7 @@ export async function getCurrentBudget(accountId) {
       throw new Error("User not found");
     }
 
-    const budget = await db.budget.findFirst({
+    const budget = await prisma.budget.findFirst({
       where: {
         userId: user.id,
       },
@@ -39,7 +38,7 @@ export async function getCurrentBudget(accountId) {
       0
     );
 
-    const expenses = await db.transaction.aggregate({
+    const expenses = await prisma.transaction.aggregate({
       where: {
         userId: user.id,
         type: "EXPENSE",
@@ -71,14 +70,14 @@ export async function updateBudget(amount) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
     // Update or create budget
-    const budget = await db.budget.upsert({
+    const budget = await prisma.budget.upsert({
       where: {
         userId: user.id,
       },

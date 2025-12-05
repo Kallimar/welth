@@ -1,6 +1,6 @@
 "use server";
 import aj from "@/lib/arcjet";
-import { db } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { request } from "@arcjet/next";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -47,7 +47,7 @@ export async function createTransaction(data) {
       throw new Error("Request blocked");
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
@@ -55,7 +55,7 @@ export async function createTransaction(data) {
       throw new Error("User not found");
     }
 
-    const account = await db.account.findUnique({
+    const account = await prisma.account.findUnique({
       where: {
         id: data.accountId,
         userId: user.id,
@@ -68,7 +68,7 @@ export async function createTransaction(data) {
     const balanceChange = data.type === "EXPENSE" ? -data.amount : data.amount;
     const newBalance = account.balance.toNumber() + balanceChange;
 
-    const transaction = await db.$transaction(async (tx) => {
+    const transaction = await prisma.$transaction(async (tx) => {
       const newTransaction = await tx.transaction.create({
         data: {
           ...data,
@@ -185,13 +185,13 @@ export async function getTransaction(id) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
 
   if (!user) throw new Error("User not found");
 
-  const transaction = await db.transaction.findUnique({
+  const transaction = await prisma.transaction.findUnique({
     where: {
       id,
       userId: user.id,
@@ -208,14 +208,14 @@ export async function updateTransaction(id, data) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
     //get original transaction to calculate balance change
-    const originalTransaction = await db.transaction.findUnique({
+    const originalTransaction = await prisma.transaction.findUnique({
       where: {
         id,
         userId: user.id,
@@ -238,7 +238,7 @@ export async function updateTransaction(id, data) {
     const netBalanceChange = newBalanceChange - oldBalanceChange;
 
     // Update transaction and account balance in a transaction
-    const transaction = await db.$transaction(async (tx) => {
+    const transaction = await prisma.$transaction(async (tx) => {
       const updated = await tx.transaction.update({
         where: {
           id,

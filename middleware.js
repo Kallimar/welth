@@ -1,4 +1,4 @@
-export const runtime = "nodejs"; // prevents Edge deployment
+// export const runtime = "nodejs"; // prevents Edge deployment
 
 import arcjet, { createMiddleware, detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";

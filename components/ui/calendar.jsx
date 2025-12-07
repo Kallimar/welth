@@ -1,61 +1,110 @@
 "use client";
 
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, getDefaultClassNames } from "react-day-picker";
+import React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { DayPicker, getDefaultClassNames, DayButton } from "react-day-picker";
 import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }) {
-  const defaultClassNames = getDefaultClassNames();
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  captionLayout = "label",
+  buttonVariant = "ghost",
+  formatters = {},
+  components = {},
+  ...props
+}) {
+  const defaults = getDefaultClassNames();
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      captionLayout={captionLayout}
       className={cn("bg-background p-3", className)}
+      formatters={{
+        formatMonthDropdown: (date) =>
+          date.toLocaleString("default", { month: "short" }),
+        ...formatters,
+      }}
       classNames={{
-        root: "w-fit",
-
-        months: "flex flex-col",
-        month: "space-y-4",
-
-        /* ✅ HEADER WRAPPER */
-        caption:
-          "relative flex items-center justify-center h-8",
-
-        caption_label:
-          "text-sm font-medium",
-
-        /* ✅ FORCE NAV INTO HEADER */
-        nav:
-          "absolute inset-y-0 left-0 right-0 flex items-center justify-between px-1",
-
-        nav_button:
-          "h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center",
-
-        /* DAYS */
-        table: "w-full border-collapse",
-        weekdays: "flex",
-        weekday:
+        root: cn("w-fit", defaults.root),
+        months: cn("flex flex-col gap-4", defaults.months),
+        month: cn("space-y-3", defaults.month),
+        nav: cn(
+          "absolute inset-x-0 flex justify-between px-1 top-0",
+          defaults.nav
+        ),
+        button_previous: cn(
+          buttonVariants({ variant: buttonVariant }),
+          "size-7 p-0",
+          defaults.button_previous
+        ),
+        button_next: cn(
+          buttonVariants({ variant: buttonVariant }),
+          "size-7 p-0",
+          defaults.button_next
+        ),
+        month_caption: cn(
+          "flex justify-center mt-2 text-sm font-medium",
+          defaults.month_caption
+        ),
+        weekdays: cn("flex", defaults.weekdays),
+        weekday: cn(
           "flex-1 text-xs text-center text-muted-foreground",
-        week: "flex w-full",
-        day: "flex-1 aspect-square flex items-center justify-center",
-        day_button:
+          defaults.weekday
+        ),
+        week: cn("flex", defaults.week),
+        day: cn(
+          "flex-1 aspect-square flex items-center justify-center",
+          defaults.day
+        ),
+        day_button: cn(
           "h-9 w-9 rounded-md text-sm hover:bg-muted",
-
-        day_selected:
+          defaults.day_button
+        ),
+        day_selected: cn(
           "bg-primary text-primary-foreground",
-        day_today:
-          "border border-primary",
-        day_outside:
+          defaults.day_selected
+        ),
+        day_outside: cn(
           "text-muted-foreground opacity-50",
-
+          defaults.outside
+        ),
         ...classNames,
       }}
       components={{
         IconLeft: () => <ChevronLeft className="h-4 w-4" />,
         IconRight: () => <ChevronRight className="h-4 w-4" />,
+        DayButton: CalendarDayButton,
+        ...components,
       }}
       {...props}
+    />
+  );
+}
+
+function CalendarDayButton({ modifiers, day, ...buttonProps }) {
+  const ref = React.useRef();
+
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      data-selected={modifiers.selected}
+      className={cn(
+        "aspect-square w-full rounded-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+      )}
+      {...buttonProps}
     />
   );
 }
